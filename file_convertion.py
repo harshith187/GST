@@ -14,8 +14,15 @@ def file_convertion(filepath):
     row_count = in_w_sheet.max_row
     col_count = in_w_sheet.max_column
     converted_sheet = convert_to_exel(in_w_sheet,  out_w_book,  row_count,  col_count)
+    converted_sheet_data_list = []
+    for row in range(5, row_count+3):
+        converted_sheet_data = []
+        for column in range(1, 14):
+            converted_sheet_data.append(converted_sheet.cell(row, column).value)
+        converted_sheet_data_list.append(converted_sheet_data)
+    print converted_sheet_data_list
     sort_converted_sheet(converted_sheet,  row_count)
-    convert_to_json(converted_sheet,  gstin,  row_count+4)
+    convert_to_json(converted_sheet_data_list,  gstin,  row_count+4)
 
 def convert_to_exel(input_worksheet,  output_workbook,  row_count,  col_count):
     output_worksheet = output_workbook["b2b"]
@@ -76,25 +83,23 @@ def get_colunm_index(col_count, header, sheet):
             if header == cell.value:
                 return col_index  
 
-def convert_to_json(sheet, gstin, row_count):
+def convert_to_json(sheet_data, gstin, row_count):
     sheet_details = OrderedDict()
-    Date = datetime.strptime(sheet.cell(row = 5,  column = 4).value, '%d-%b-%Y')
+    Date = datetime.strptime(sheet_data[0][3], '%d-%b-%Y')
     sheet_details['fp'] = str(Date.strftime("%m%Y"))
     sheet_details['gstin'] = str(gstin)
     sheet_details['hash'] = 'hash'
     sheet_details['version'] = 'GST2.2.6'
     gstins = []
-    first_column = sheet['A']
-    for x in xrange(4, row_count-2):
-        gstins.append(first_column[x].value) 
+    for row in sheet_data:
+        gstins.append(row[0]) 
     data_list = []
     gstin_index = 0
-    i = 5
-    while(i < row_count-1):
-        gstin_details_list = []
-        for j in range(1, 14):
-            gstin_details = OrderedDict()
-            gstin_details_list.append(sheet.cell(row = i,  column = j).value)
+    i = 0
+    while(i < len(sheet_data)):
+        gstin_details = OrderedDict()
+        print sheet_data[i]
+        gstin_details_list = sheet_data[i]
         gstin_details['ctin'] = gstin_details_list[0]
         invoice_list=[]
         while True:
@@ -119,16 +124,14 @@ def convert_to_json(sheet, gstin, row_count):
             num_list.append(num)
             invoice['itms'] = num_list
             invoice_list.append(invoice)
-            print "\n", invoice_list, "\n"
             gstin_index += 1
             if ( gstin_index >= len(gstins)):
                 break
             if (gstins[gstin_index-1] == gstins[gstin_index]):
                 i += 1
                 gstin_details_list = []
-                for j in range(1, 14):
-                    gstin_details = OrderedDict()
-                    gstin_details_list.append(sheet.cell(row = i,  column = j).value)
+                gstin_details = OrderedDict()
+                gstin_details_list.append(sheet_data[i])
             else:
                 break
         i += 1
