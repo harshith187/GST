@@ -4,7 +4,6 @@ from operator import itemgetter
 
 import openpyxl
 import simplejson as json
-import xlwt
 
 def file_convertion(filepath):
     in_w_book = openpyxl.load_workbook(filename=filepath)
@@ -20,7 +19,6 @@ def file_convertion(filepath):
         for column in range(1, 14):
             converted_sheet_data.append(converted_sheet.cell(row, column).value)
         converted_sheet_data_list.append(converted_sheet_data)
-    print converted_sheet_data_list
     sort_converted_sheet(converted_sheet,  row_count)
     convert_to_json(converted_sheet_data_list,  gstin,  row_count+4)
 
@@ -36,7 +34,7 @@ def convert_to_exel(input_worksheet,  output_workbook,  row_count,  col_count):
         if(header <> "skip_rate"):
             selected_data = copy_data(col_index , 2 , col_index , row_count ,  input_worksheet,   header)
         paste_data(index, 5, index, row_count+2, header, output_worksheet, input_worksheet,  selected_data)
-    #output_workbook.save("converted_gstin1.xlsx")
+    output_workbook.save("converted_gstin1.xlsx")
     return output_worksheet
 
 def copy_data(start_col,  start_row,  end_col,  end_row,  sheet, header):
@@ -63,7 +61,7 @@ def paste_data(start_col,  start_row,  end_col,  end_row, header,  output_sheet,
                 invoice_object =  datetime.strftime(invoice_date,  '%d-%b-%Y')  
                 output_sheet.cell(row = i,  column = j).value = invoice_object
             elif(header == "skip_rate"):
-                rate = calc_rate(input_sheet,  i-3) #i is the row of which the data is to be calculate 
+                rate = calc_rate(input_sheet,  i-3) #i-3 gives the row of which the data is to be calculate 
                 output_sheet.cell(row = i,  column = j).value = rate
             else:
                 output_sheet.cell(row = i,  column = j).value = copied_data[count_row][count_col]
@@ -95,11 +93,10 @@ def convert_to_json(sheet_data, gstin, row_count):
         gstins.append(row[0]) 
     data_list = []
     gstin_index = 0
-    i = 0
-    while(i < len(sheet_data)):
+    index = 0
+    while(index < len(sheet_data)):
         gstin_details = OrderedDict()
-        print sheet_data[i]
-        gstin_details_list = sheet_data[i]
+        gstin_details_list = sheet_data[index]
         gstin_details['ctin'] = gstin_details_list[0]
         invoice_list=[]
         while True:
@@ -128,21 +125,21 @@ def convert_to_json(sheet_data, gstin, row_count):
             if ( gstin_index >= len(gstins)):
                 break
             if (gstins[gstin_index-1] == gstins[gstin_index]):
-                i += 1
+                index += 1
                 gstin_details_list = []
                 gstin_details = OrderedDict()
-                gstin_details_list.append(sheet_data[i])
+                gstin_details_list.append(sheet_data[index])
             else:
                 break
-        i += 1
+        index += 1
         gstin_details['inv'] = invoice_list
         sheet_details['b2b'] = data_list
         data_list.append(gstin_details)
                 
 
-    j = json.dumps(sheet_details)
-    with open('final.json',  'w') as f:
-        f.write(j) 
+    json_data = json.dumps(sheet_details)
+    with open('GSTR_JSON_FILE.json',  'w') as json_file:
+        json_file.write(json_data) 
 
 def sort_converted_sheet(converted_sheet, row_count):
     details = []
