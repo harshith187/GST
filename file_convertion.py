@@ -13,13 +13,13 @@ def file_convertion(filepath):
     row_count = in_w_sheet.max_row
     col_count = in_w_sheet.max_column
     converted_sheet = convert_to_exel(in_w_sheet,  out_w_book,  row_count,  col_count)
+    sort_converted_sheet(converted_sheet,  row_count)
     converted_sheet_data_list = []
     for row in range(5, row_count+3):
         converted_sheet_data = []
         for column in range(1, 14):
             converted_sheet_data.append(converted_sheet.cell(row, column).value)
         converted_sheet_data_list.append(converted_sheet_data)
-    sort_converted_sheet(converted_sheet,  row_count)
     convert_to_json(converted_sheet_data_list,  gstin,  row_count+4)
 
 def convert_to_exel(input_worksheet,  output_workbook,  row_count,  col_count):
@@ -97,10 +97,10 @@ def convert_to_json(sheet_data, gstin, row_count):
     while(index < len(sheet_data)):
         gstin_details = OrderedDict()
         gstin_details_list = sheet_data[index]
-        gstin_details['ctin'] = gstin_details_list[0]
         invoice_list=[]
         while True:
             invoice = {} 
+            gstin_details['ctin'] = gstin_details_list[0]
             invoice['inum'] = gstin_details_list[2]
             invoice_date = datetime.strptime(gstin_details_list[3], "%d-%b-%Y")
             invoice['idt'] = datetime.strftime(invoice_date,  '%d-%m-%Y')
@@ -126,9 +126,8 @@ def convert_to_json(sheet_data, gstin, row_count):
                 break
             if (gstins[gstin_index-1] == gstins[gstin_index]):
                 index += 1
-                gstin_details_list = []
                 gstin_details = OrderedDict()
-                gstin_details_list.append(sheet_data[index])
+                gstin_details_list = sheet_data[index]
             else:
                 break
         index += 1
@@ -143,7 +142,7 @@ def convert_to_json(sheet_data, gstin, row_count):
 
 def sort_converted_sheet(converted_sheet, row_count):
     details = []
-    for i in range(5,  row_count):
+    for i in range(5,  row_count+3):
         row_details = []
         for cell in converted_sheet[i]:
             row_details.append(cell.value), 
