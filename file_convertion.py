@@ -9,7 +9,7 @@ def file_convertion(filepath):
     in_w_book = openpyxl.load_workbook(filename=filepath)
     in_w_sheet = in_w_book["Query Report"]
     gstin = in_w_sheet.cell(row = 2,  column = 7).value
-    out_w_book = openpyxl.load_workbook(filename="/Users/harshith/projects/gst/GSTR1_Excel_Workbook_Template_V1.5.xlsx")
+    out_w_book = openpyxl.load_workbook(filename="GSTR1_Excel_Workbook_Template_V1.5.xlsx")
     row_count = in_w_sheet.max_row
     col_count = in_w_sheet.max_column
     converted_sheet = convert_to_exel(in_w_sheet,  out_w_book,  row_count,  col_count)
