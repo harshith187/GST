@@ -4,23 +4,7 @@ from operator import itemgetter
 
 import openpyxl
 import simplejson as json
-
-def file_convertion(filepath):
-    in_w_book = openpyxl.load_workbook(filename=filepath)
-    in_w_sheet = in_w_book["Query Report"]
-    gstin = in_w_sheet.cell(row = 2,  column = 7).value
-    out_w_book = openpyxl.load_workbook(filename="GSTR1_Excel_Workbook_Template_V1.5.xlsx")
-    row_count = in_w_sheet.max_row
-    col_count = in_w_sheet.max_column
-    converted_sheet = convert_to_exel(in_w_sheet,  out_w_book,  row_count,  col_count)
-    sort_converted_sheet(converted_sheet,  row_count)
-    converted_sheet_data_list = []
-    for row in range(5, row_count+3):
-        converted_sheet_data = []
-        for column in range(1, 14):
-            converted_sheet_data.append(converted_sheet.cell(row, column).value)
-        converted_sheet_data_list.append(converted_sheet_data)
-    convert_to_json(converted_sheet_data_list,  gstin,  row_count+4)
+import sys
 
 def convert_to_exel(input_worksheet,  output_workbook,  row_count,  col_count):
     output_worksheet = output_workbook["b2b"]
@@ -34,7 +18,8 @@ def convert_to_exel(input_worksheet,  output_workbook,  row_count,  col_count):
         if(header <> "skip_rate"):
             selected_data = copy_data(col_index , 2 , col_index , row_count ,  input_worksheet,   header)
         paste_data(index, 5, index, row_count+2, header, output_worksheet, input_worksheet,  selected_data)
-    output_workbook.save("converted_gstin1.xlsx")
+    if sys.argv[2] == "Exel":
+        output_workbook.save("converted_gstin1.xlsx")
     return output_worksheet
 
 def copy_data(start_col,  start_row,  end_col,  end_row,  sheet, header):
@@ -151,3 +136,20 @@ def sort_converted_sheet(converted_sheet, row_count):
     for index_r,  row in enumerate(details):
         for index_c,  value in enumerate(row):
             converted_sheet.cell(row = index_r+5, column =  index_c+1).value =  value
+
+in_w_book = openpyxl.load_workbook(filename=sys.argv[1])
+in_w_sheet = in_w_book["Query Report"]
+gstin = in_w_sheet.cell(row = 2,  column = 7).value
+out_w_book = openpyxl.load_workbook(filename="GSTR1_Excel_Workbook_Template_V1.5.xlsx")
+row_count = in_w_sheet.max_row
+col_count = in_w_sheet.max_column
+converted_sheet = convert_to_exel(in_w_sheet,  out_w_book,  row_count,  col_count)
+if sys.argv[2] == "Json":
+    sort_converted_sheet(converted_sheet,  row_count)
+    converted_sheet_data_list = []
+    for row in range(5, row_count+3):
+        converted_sheet_data = []
+        for column in range(1, 14):
+            converted_sheet_data.append(converted_sheet.cell(row, column).value)
+        converted_sheet_data_list.append(converted_sheet_data)
+    convert_to_json(converted_sheet_data_list,  gstin,  row_count+4)
