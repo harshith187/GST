@@ -1,8 +1,14 @@
 # GST
-This code imports the data from  GST Sales Register(exel) , genarated from erpnext software , to the official GSTR1 exel format and then further converts to json which can be directly uploaded to the official gst portal.
+This code imports the data from  GST Sales Register(exel) , genarated from erpnext software , to the official GSTR1 exel format and converts to json which can be directly uploaded to the official gst portal.
 
-You can use this command to execute the code in command line,
+The code can be executed through command line arguments:
 
-      python -c 'import file_convertion;file_convertion.file_convertion(filepath)'
+For Exel:
+
+      python file_convertion.py filepath Exel
+      
+For Json:
+      
+      python file_convertion.py filepath Json
       
  Ensure that you are in the right directory.
